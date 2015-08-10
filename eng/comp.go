@@ -16,17 +16,14 @@ var gfGrass = &Gfx{
 
 var gfTree = &Gfx{
 	Source: &sdl.Rect{0, 32, tileSize, tileSize},
-	Coll:   true,
 }
 
 var gfWall = &Gfx{
 	Source: &sdl.Rect{32, 0, tileSize, tileSize},
-	Coll:   true,
 }
 
 var gfEnemy = &Gfx{
 	Source: &sdl.Rect{576, 512, tileSize, tileSize},
-	Coll:   true,
 }
 
 var MVSpeed = Movement{
@@ -43,11 +40,12 @@ type Vector2d struct {
 type Gfx struct {
 	Source *sdl.Rect
 	Txtr   *sdl.Texture
-	Coll   bool
 }
 
 type Space struct {
-	Gfxs [4]*Gfx
+	Gfxs     [4]*Gfx // Store up to 4 layers of tiles
+	Terrains [4]*Terrain
+	Coll     bool
 }
 
 type Object struct {

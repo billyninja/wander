@@ -188,6 +188,10 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 				continue
 			}
 
+			rect := Object{
+				Pos: sdl.Rect{sw, sh, ofX, ofY},
+			}
+
 			for _, gfx := range s.World[worldCellX][worldCellY].Gfxs {
 
 				if gfx != nil {
@@ -202,19 +206,13 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 						Source = gfx.Source
 					}
 
-					rect := Object{
-						Pos: sdl.Rect{sw, sh, ofX, ofY},
-					}
-
-					//println(s.TsTxt, ">>>", gfx.Txtr)
-
 					renderer.Copy(s.TsTxt, Source, &rect.Pos)
-
-					// Updating CullM
-					if gfx.Coll {
-						s.CullM = append(s.CullM, &rect)
-					}
 				}
+			}
+
+			// Updating CullM
+			if s.World[worldCellX][worldCellY].Coll {
+				s.CullM = append(s.CullM, &rect)
 			}
 		}
 	}

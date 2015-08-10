@@ -7,7 +7,15 @@ import (
 	"github.com/veandco/go-sdl2/sdl_image"
 	"io/ioutil"
 	"os"
+	"strconv"
+	"strings"
 )
+
+type TileType struct {
+	Id     int    `xml:"id,attr"`
+	TerStr string `xml:"terrain,attr"`
+	TerArr [4]int
+}
 
 type Tile struct {
 	Gid int `xml:"gid,attr"`
@@ -46,11 +54,26 @@ type TSImg struct {
 	SrcWidth  int    `xml:"width,attr"`
 }
 
+type Property struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
+}
+
+type Terrain struct {
+	Name       string            `xml:"name,attr"`
+	PropList   []Property        `xml:"properties>property"`
+	Properties map[string]string // Must build from PropList
+}
+
 type TileSet struct {
 	Name  string `xml:"name,attr"`
 	Image TSImg  `xml:"image"`
 	TileH int    `xml:"tileheight,attr"`
 	TileW int    `xml:"tilewidth,attr"`
+
+	TerrTypes    []Terrain  `xml:"terraintypes>terrain"`
+	TerrainTiles []TileType `xml:"tile"`
+	TTMap        map[int][4]*Terrain
 
 	Txtr *sdl.Texture
 	Gids []*Gfx
@@ -83,6 +106,8 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 
 	for i := 0; i < len(tmx.Tilesets); i++ {
 
+		tmx.Tilesets[i].TTMap = make(map[int][4]*Terrain)
+
 		tilesetImg, err := img.Load("assets/" + tmx.Tilesets[i].Image.Src)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to load PNG: %s\n", err)
@@ -97,20 +122,44 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 		}
 		defer tilesetTxt.Destroy()
 
+		// TODO from PropList build Properties (map)
+
+		/*
+		 TerrTypes    []Terrain           `xml:"terraintypes"`
+		 TerrainTiles []Tile              `xml:"tile"`
+		 TTMap        map[int][4]*Terrain
+		*/
+
+		for _, tt := range tmx.Tilesets[i].TerrainTiles {
+
+			var terrList [4]*Terrain
+
+			// Spliting and converting into integer so that it
+			// can be used as array idx
+			for _, terr := range strings.Split(tt.TerStr, ",") {
+				ttype, _ := strconv.Atoi(terr)
+				println(len(tmx.Tilesets[i].TerrTypes), ">>>", ttype)
+				terrList[i] = &tmx.Tilesets[i].TerrTypes[ttype]
+			}
+
+			tmx.Tilesets[i].TTMap[tt.Id] = terrList
+		}
+
 		tmx.Tilesets[i].Txtr = tilesetTxt
 	}
 
-	world := make([][]Space, 100)
+	world := make([][]Space, tmx.HeightTiles)
 	ts := tmx.Tilesets[0]
 
 	for li, layer := range tmx.Layers {
 		for i := 0; i < layer.Height; i++ {
 
-			world[i] = make([]Space, 100)
+			world[i] = make([]Space, tmx.WidthTiles)
 
 			for j := 0; j < layer.Width; j++ {
 				tile := layer.Tiles[(i*layer.Height)+j]
 
+				world[i][j].Terrains = ts.TTMap[tile.Gid]
 				world[i][j].Gfxs[li] = &Gfx{
 					Txtr:   ts.Txtr,
 					Source: ts.GetGIDRect(tile.Gid),
