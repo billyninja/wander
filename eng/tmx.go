@@ -11,6 +11,29 @@ import (
 	"strings"
 )
 
+type ObjGroup struct {
+	Name    string    `xml:"name,attr"`
+	Objects []TObject `xml:"object"`
+}
+
+/*
+	<object name="toCave1" type="door" x="320" y="8" width="32" height="24">
+	 <properties>
+	  <property name="target" value="cave1"/>
+	 </properties>
+	</object>
+*/
+
+type TObject struct {
+	Name     string     `xml:"name,attr"`
+	Type     string     `xml:"type,attr"`
+	X        int32      `xml:"x,attr"`
+	Y        int32      `xml:"y,attr"`
+	W        int32      `xml:"width,attr"`
+	H        int32      `xml:"height,attr"`
+	PropList []Property `xml:"properties>property"`
+}
+
 type TileType struct {
 	Id     int    `xml:"id,attr"`
 	TerStr string `xml:"terrain,attr"`
@@ -28,24 +51,16 @@ type Layer struct {
 	Width  int    `xml:"width,attr"`
 }
 
-type Map struct {
-	Layers      []Layer   `xml:"layer"`
-	Tilesets    []TileSet `xml:"tileset"`
-	HeightTiles int       `xml:"height,attr"`
-	WidthTiles  int       `xml:"width,attr"`
-	TileH       int32     `xml:"tileheight,attr"`
-	TileW       int32     `xml:"tilewidth,attr"`
-}
-
 type TMX struct {
 	Layers   []Layer   `xml:"layer"`
 	Tilesets []TileSet `xml:"tileset"`
 
-	XMLName     xml.Name `xml:"map"`
-	HeightTiles int      `xml:"height,attr"`
-	WidthTiles  int      `xml:"width,attr"`
-	TileH       int      `xml:"tileheight,attr"`
-	TileW       int      `xml:"tilewidth,attr"`
+	XMLName     xml.Name   `xml:"map"`
+	HeightTiles int        `xml:"height,attr"`
+	WidthTiles  int        `xml:"width,attr"`
+	TileH       int        `xml:"tileheight,attr"`
+	TileW       int        `xml:"tilewidth,attr"`
+	ObjGroups   []ObjGroup `xml:"objectgroup"`
 }
 
 type TSImg struct {
@@ -87,7 +102,7 @@ func (ts *TileSet) GetGIDRect(gid int) *sdl.Rect {
 	return &sdl.Rect{x, y, int32(ts.TileW), int32(ts.TileH)}
 }
 
-func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
+func LoadTMX(mapname string, renderer *sdl.Renderer) ([][]Space, []*Object) {
 
 	f, _ := os.Open(mapname)
 	output, _ := ioutil.ReadAll(f)
@@ -180,8 +195,23 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 		}
 	}
 
+	// Now loading the Tiled Objects
+	var objects []*Object
+
+	for _, g := range tmx.ObjGroups {
+		println(g.Name)
+		for _, o := range g.Objects {
+			println(o.Name)
+			obj := &Object{
+				Pos: sdl.Rect{o.X, o.Y, o.W, o.H},
+				Gfx: nil,
+			}
+			objects = append(objects, obj)
+		}
+	}
+
 	//tmx = nil
-	return world
+	return world, objects
 }
 
 func FreezeLayer(world [][]Space, idx int) *sdl.Texture {

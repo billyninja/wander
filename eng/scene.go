@@ -33,6 +33,7 @@ type Scene struct {
 	Width, Height int32
 	Cam           Camera
 	CullM         []Holder
+	Objects       []*Object
 	Enemies       []*Actor
 	GUIBlocks     []*GUIBlock
 
@@ -73,7 +74,7 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 	s.PC = &Actor{
 		Object: Object{
 			sdl.Rect{500, 500, tileSize, tileSize},
-			gfTree,
+			&Gfx{},
 		},
 		Speed:      Vector2d{2, 2},
 		Sprite:     sp1,
@@ -83,18 +84,7 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 	s.WidthCells = uint16(s.Width / tileSize)
 	s.HeightCells = uint16(s.Height / tileSize)
 
-	/*s.World = make([][]Space, s.WidthCells)
-
-	for i := 0; uint16(i) < s.WidthCells; i++ {
-		s.World[i] = make([]Space, s.HeightCells)
-		for j, _ := range s.World[i] {
-			sp := Space{}
-			sp.Gfxs[0] = gfGrass
-			s.World[i][j] = sp
-		}
-	}*/
-
-	s.World = LoadTMX("assets/world.tmx", renderer)
+	s.World, s.Objects = LoadTMX("assets/world.tmx", renderer)
 
 	cl1 := sdl.Color{20, 20, 20, 255}
 	cl2 := sdl.Color{50, 50, 50, 255}
@@ -140,7 +130,7 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 		s.Enemies = append(s.Enemies, &Actor{
 			Object: Object{
 				sdl.Rect{ci, cj, tileSize, tileSize},
-				gfTree,
+				&Gfx{},
 			},
 			Speed:      Vector2d{1, 1},
 			Sprite:     sp1,

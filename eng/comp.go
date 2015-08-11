@@ -9,23 +9,6 @@ const (
 	tileSize int32 = 32
 )
 
-// TEMP
-var gfGrass = &Gfx{
-	Source: &sdl.Rect{0, 0, tileSize, tileSize},
-}
-
-var gfTree = &Gfx{
-	Source: &sdl.Rect{0, 32, tileSize, tileSize},
-}
-
-var gfWall = &Gfx{
-	Source: &sdl.Rect{32, 0, tileSize, tileSize},
-}
-
-var gfEnemy = &Gfx{
-	Source: &sdl.Rect{576, 512, tileSize, tileSize},
-}
-
 var MVSpeed = Movement{
 	Vector2d{0, -1},
 	Vector2d{0, 1},
