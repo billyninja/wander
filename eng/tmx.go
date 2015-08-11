@@ -130,6 +130,14 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 		 TTMap        map[int][4]*Terrain
 		*/
 
+		for _, terrt := range tmx.Tilesets[i].TerrTypes {
+			terrt.Properties = make(map[string]string)
+			for _, p := range terrt.PropList {
+				println(terrt.Name, ":", p.Name, "=", p.Value)
+				terrt.Properties[p.Name] = p.Value
+			}
+		}
+
 		for _, tt := range tmx.Tilesets[i].TerrainTiles {
 
 			var terrList [4]*Terrain
