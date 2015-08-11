@@ -41,7 +41,6 @@ type Scene struct {
 	SsTxt *sdl.Texture
 	Font  *ttf.Font
 
-	ObstCount   uint16
 	EnemyCount  uint16
 	WidthCells  uint16
 	HeightCells uint16
@@ -118,12 +117,7 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 		block.Baked = block.Bake(renderer)
 	}
 
-	// for i := 0; uint16(i) < s.ObstCount; i++ {
-	// 	ci := rand.Int31n(int32(s.WidthCells))
-	// 	cj := rand.Int31n(int32(s.HeightCells))
-	// 	s.World[ci][cj].Gfxs[0] = gfWall
-	// }
-
+	// TODO: load from tiled objects
 	for i := 0; uint16(i) < s.EnemyCount; i++ {
 		ci := rand.Int31n(s.Width)
 		cj := rand.Int31n(s.Height)
@@ -150,8 +144,6 @@ func (s *Scene) Update() {
 }
 
 func (s *Scene) Render(renderer *sdl.Renderer) {
-	//tgt := renderer.GetRenderTarget()
-	//tgt.SetBlendMode(sdl.BLENDMODE_BLEND)
 
 	s.CullM = s.CullM[:0]
 
@@ -167,12 +159,9 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 			ofX = (tileSize - ((s.Cam.WX + sw) % tileSize))
 			ofY = (tileSize - ((s.Cam.WY + sh) % tileSize))
 
-			//fmt.Printf(" %d x %d |", ofX, ofY)
-
 			var worldCellX uint16 = uint16((s.Cam.WX + sw) / tileSize)
 			var worldCellY uint16 = uint16((s.Cam.WY + sh) / tileSize)
 
-			// TODO TRATAR VALORES NEGATIVOS
 			if worldCellX < 0 || worldCellX > s.WidthCells || worldCellY < 0 || worldCellY > s.HeightCells {
 				renderer.FillRect(&sdl.Rect{sw, sh, ofX, ofY})
 				continue
@@ -216,6 +205,8 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 			s.CullM = append(s.CullM, e)
 		}
 	}
+
+	// TODO
 
 	pos := WorldToScreen(s.PC.Pos, s)
 	renderer.Copy(s.SsTxt, s.PC.GetPose(), &pos)

@@ -6,6 +6,10 @@ import (
 	"math/rand"
 )
 
+const (
+	tileSize int32 = 32
+)
+
 type Actor struct {
 	Object
 	Chasing bool

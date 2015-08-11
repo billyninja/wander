@@ -5,10 +5,6 @@ import (
 	//"github.com/veandco/go-sdl2/sdl_image"
 )
 
-const (
-	tileSize int32 = 32
-)
-
 var MVSpeed = Movement{
 	Vector2d{0, -1},
 	Vector2d{0, 1},

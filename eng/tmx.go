@@ -16,14 +16,6 @@ type ObjGroup struct {
 	Objects []TObject `xml:"object"`
 }
 
-/*
-	<object name="toCave1" type="door" x="320" y="8" width="32" height="24">
-	 <properties>
-	  <property name="target" value="cave1"/>
-	 </properties>
-	</object>
-*/
-
 type TObject struct {
 	Name     string     `xml:"name,attr"`
 	Type     string     `xml:"type,attr"`
@@ -170,16 +162,10 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) ([][]Space, []*Object) {
 				}
 
 				for _, terr := range world[i][j].Terrains {
-					/*
-						COLLISION
-						WARP_TO
-						DMG
-					*/
 					if terr == nil {
 						continue
 					}
 
-					//println(terr.Name)
 					for _, prop := range terr.PropList {
 						switch prop.Name {
 						case "COLL":

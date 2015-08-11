@@ -163,7 +163,6 @@ func main() {
 		Width:      2999,
 		Height:     2999,
 		Cam:        eng.Camera{0, 0},
-		ObstCount:  220,
 		EnemyCount: 220,
 		TsTxt:      tilesetTxt,
 		SsTxt:      spritesheetTxt,
