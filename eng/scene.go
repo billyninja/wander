@@ -19,6 +19,53 @@ type Camera struct {
 
 type Holder interface {
 	GetPos() sdl.Rect
+	GetType() ObjectType
+}
+
+type CullingMap struct {
+	PCs   []Holder // PLAYER CHARACTER
+	FNPCs []Holder // Friendly NPC
+	ENPCs []Holder // Enemy NPC
+	SOLs  []Holder // Some Generic Solid Object
+	TRIGs []Holder // GENERIC TRIGGER
+}
+
+func (cm *CullingMap) Add(obj Holder, s *Scene) bool {
+
+	obj_pos := WorldToScreen(obj.GetPos(), s.Cam)
+
+	// If not within viewport boundries...
+	if !(obj_pos.X > 0 &&
+		obj_pos.Y > 0 &&
+		obj_pos.X < s.Window.Width &&
+		obj_pos.Y < s.Window.Height) {
+		return false
+	}
+
+	switch obj.GetType() {
+	case ENPC:
+		cm.ENPCs = append(cm.ENPCs, obj)
+		return true
+	case FNPC:
+		cm.FNPCs = append(cm.FNPCs, obj)
+		return true
+	case SOL:
+		cm.SOLs = append(cm.SOLs, obj)
+		return true
+	case TRIG:
+		cm.TRIGs = append(cm.TRIGs, obj)
+		return true
+	default:
+		return true
+	}
+}
+
+func (cm *CullingMap) Zero() {
+	cm.PCs = []Holder{}
+	cm.FNPCs = []Holder{}
+	cm.ENPCs = []Holder{}
+	cm.SOLs = []Holder{}
+	cm.TRIGs = []Holder{}
 }
 
 type Scene struct {
@@ -32,7 +79,7 @@ type Scene struct {
 	World         [][]Space
 	Width, Height int32
 	Cam           Camera
-	CullM         []Holder
+	CullM         CullingMap
 	Objects       []*Object
 	Enemies       []*Actor
 	GUIBlocks     []*GUIBlock
@@ -72,8 +119,9 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 
 	s.PC = &Actor{
 		Object: Object{
-			sdl.Rect{500, 500, tileSize, tileSize},
+			sdl.Rect{400, 120, tileSize, tileSize},
 			&Gfx{},
+			PC,
 		},
 		Speed:      Vector2d{2, 2},
 		Sprite:     sp1,
@@ -125,6 +173,7 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 			Object: Object{
 				sdl.Rect{ci, cj, tileSize, tileSize},
 				&Gfx{},
+				ENPC,
 			},
 			Speed:      Vector2d{1, 1},
 			Sprite:     sp1,
@@ -134,8 +183,10 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 }
 
 func (s *Scene) Update() {
+
+	// Update AI for Enemies that are within Screen
 	for _, e := range s.Enemies {
-		pos := WorldToScreen(e.Pos, s)
+		pos := WorldToScreen(e.Pos, s.Cam)
 
 		if pos.X > 0 && pos.Y > 0 && pos.X < s.Window.Width && pos.Y < s.Window.Height {
 			e.UpdateAI(s)
@@ -145,23 +196,27 @@ func (s *Scene) Update() {
 
 func (s *Scene) Render(renderer *sdl.Renderer) {
 
-	s.CullM = s.CullM[:0]
+	// Empty CullM
+	s.CullM.Zero()
 
 	var init int32 = 0
 	var Source *sdl.Rect
 
-	var ofX, ofY int32 = 32, 32
+	var ofX, ofY int32 = tileSize, tileSize
 
 	renderer.SetDrawColor(0, 0, 0, 255)
 
+	// Rendering the map
 	for sw := init; sw < s.Window.Width; sw += ofX {
 		for sh := init; sh < s.Window.Height; sh += ofY {
+
 			ofX = (tileSize - ((s.Cam.WX + sw) % tileSize))
 			ofY = (tileSize - ((s.Cam.WY + sh) % tileSize))
 
 			var worldCellX uint16 = uint16((s.Cam.WX + sw) / tileSize)
 			var worldCellY uint16 = uint16((s.Cam.WY + sh) / tileSize)
 
+			// Draw black box for out of bounds areas
 			if worldCellX < 0 || worldCellX > s.WidthCells || worldCellY < 0 || worldCellY > s.HeightCells {
 				renderer.FillRect(&sdl.Rect{sw, sh, ofX, ofY})
 				continue
@@ -189,31 +244,28 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 				}
 			}
 
-			// Updating CullM
-			if s.World[worldCellX][worldCellY].Coll {
-				s.CullM = append(s.CullM, &rect)
-			}
+			// Updating CullM with SOLID/COLLIDABLE terrain types
+			/*if s.World[worldCellX][worldCellY].Coll {
+				s.CullM.Add(s.World[worldCellX][worldCellY], s)
+			}*/
 		}
 	}
 
-	//drawCullMap(renderer)
+	// Rendering the enemies
 	for _, e := range s.Enemies {
-		pos := WorldToScreen(e.Pos, s)
+		pos := WorldToScreen(e.Pos, s.Cam)
 
-		if pos.X > 0 && pos.Y > 0 && pos.X < s.Window.Width && pos.Y < s.Window.Height {
+		if in := s.CullM.Add(e, s); in {
 			renderer.Copy(s.SsTxt, e.GetPose(), &pos)
-			s.CullM = append(s.CullM, e)
 		}
 	}
 
-	// TODO
-
-	pos := WorldToScreen(s.PC.Pos, s)
+	// Rendering the player character
+	pos := WorldToScreen(s.PC.Pos, s.Cam)
 	renderer.Copy(s.SsTxt, s.PC.GetPose(), &pos)
 
-	// First get the surface
+	// Rendering FRAME RATE COUNTER
 	fps := fmt.Sprintf("%v", s.GetFPS())
-
 	surface, _ := s.Font.RenderUTF8_Solid(fps, sdl.Color{255, 255, 255, 255})
 	defer surface.Free()
 
@@ -221,6 +273,18 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 	defer txtr.Destroy()
 	renderer.Copy(txtr, &sdl.Rect{0, 0, surface.W, surface.H}, &sdl.Rect{0, 0, surface.W, surface.H})
 
+	// Rendering Game Objects
+	for _, obj := range s.Objects {
+
+		obj_pos := WorldToScreen(obj.Pos, s.Cam)
+
+		if in := s.CullM.Add(obj, s); in {
+			renderer.SetDrawColor(255, 0, 0, 125)
+			renderer.FillRect(&obj_pos)
+		}
+	}
+
+	// Rendering GUI Blocks
 	for _, gb := range s.GUIBlocks {
 		renderer.Copy(gb.Baked, gb.Pos, gb.Pos)
 	}

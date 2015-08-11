@@ -22,6 +22,16 @@ type Actor struct {
 	CurrPose   uint8
 }
 
+// Implements for Holder Interface
+func (a *Actor) GetPos() sdl.Rect {
+	return a.Object.Pos
+}
+
+// Implements for Holder Interface
+func (a *Actor) GetType() ObjectType {
+	return a.Object.Type
+}
+
 func (a *Actor) Animate(m Vector2d) {
 	var nAction SpriteAction
 
@@ -49,11 +59,6 @@ func (a *Actor) Animate(m Vector2d) {
 			a.CurrPose = 0
 		}
 	}
-
-}
-
-func (a *Actor) GetPos() sdl.Rect {
-	return a.Object.Pos
 }
 
 func (a *Actor) GetPose() *sdl.Rect {
@@ -118,11 +123,12 @@ func (a *Actor) Move(m Vector2d, currScene *Scene) {
 		a.Animate(m)
 	}
 
+	// Final speed
 	fSpd := Vector2d{(m.X * a.Speed.X), (m.Y * a.Speed.Y)}
 	nPos.X += fSpd.X
 	nPos.Y += fSpd.Y
 
-	if !CheckAllColl(WorldToScreen(nPos, currScene), currScene, fSpd) {
+	if !CheckAllColl(a, currScene, fSpd) {
 		a.Pos = nPos
 	}
 }

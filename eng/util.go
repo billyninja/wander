@@ -46,22 +46,54 @@ func CheckColl(a, b sdl.Rect, s Vector2d) bool {
 	return true
 }
 
-func CheckAllColl(sbj sdl.Rect, s *Scene, spd Vector2d) bool {
-	for _, b := range s.CullM {
+func CheckAllColl(sbj Holder, s *Scene, spd Vector2d) bool {
 
-		pos := b.GetPos()
+	a_pos := sbj.GetPos()
 
-		// TODO - pensar em um refactory que elimine esse teste
-		switch b.(type) {
-		case *Actor:
-			pos = WorldToScreen(pos, s)
-			break
+	// NOTE: ORDER IS IMPORTANT HERE
+	// Since the func return (exits) on the first collision
+
+	// If the subject is a Player Character...
+	if sbj.GetType() == PC {
+		// Check against Abstract objects e.g: door triggers
+		for _, b := range s.CullM.TRIGs {
+
+			b_pos := WorldToScreen(b.GetPos(), s.Cam)
+
+			if CheckColl(a_pos, b_pos, spd) {
+				println("collided!!")
+				//b.Collided(sbj)
+			}
 		}
+	}
 
-		if CheckColl(sbj, pos, spd) {
+	for _, b := range s.CullM.SOLs {
+
+		b_pos := WorldToScreen(b.GetPos(), s.Cam)
+
+		if CheckColl(a_pos, b_pos, spd) {
 			return true
 		}
 	}
+
+	for _, b := range s.CullM.ENPCs {
+
+		b_pos := WorldToScreen(b.GetPos(), s.Cam)
+
+		if CheckColl(a_pos, b_pos, spd) {
+			return true
+		}
+	}
+
+	for _, b := range s.CullM.FNPCs {
+
+		b_pos := WorldToScreen(b.GetPos(), s.Cam)
+
+		if CheckColl(a_pos, b_pos, spd) {
+			return true
+		}
+	}
+
 	return false
 }
 
@@ -69,10 +101,10 @@ func v2Rect(p Vector2d) sdl.Rect {
 	return sdl.Rect{p.X, p.Y, tileSize, tileSize}
 }
 
-func WorldToScreen(pos sdl.Rect, currScene *Scene) sdl.Rect {
+func WorldToScreen(pos sdl.Rect, cam Camera) sdl.Rect {
 	return sdl.Rect{
-		X: pos.X - currScene.Cam.WX,
-		Y: pos.Y - currScene.Cam.WY,
+		X: pos.X - cam.WX,
+		Y: pos.Y - cam.WY,
 		W: pos.W,
 		H: pos.H,
 	}

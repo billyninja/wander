@@ -185,9 +185,7 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) ([][]Space, []*Object) {
 	var objects []*Object
 
 	for _, g := range tmx.ObjGroups {
-		println(g.Name)
 		for _, o := range g.Objects {
-			println(o.Name)
 			obj := &Object{
 				Pos: sdl.Rect{o.X, o.Y, o.W, o.H},
 				Gfx: nil,

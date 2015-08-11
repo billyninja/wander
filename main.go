@@ -14,11 +14,13 @@ import (
 )
 
 var (
-	winTitle   string = "Go-SDL2 Wander"
-	imageName  string = "assets/textures/ts1.png"
-	event      sdl.Event
-	currScene  *eng.Scene
-	sp1        *eng.SpriteSheet
+	winTitle  string = "Go-SDL2 Wander"
+	imageName string = "assets/textures/ts1.png"
+	event     sdl.Event
+	currScene *eng.Scene
+	sp1       *eng.SpriteSheet
+
+	// TODO passar para struct eng.Cam
 	camDZUp    sdl.Rect = sdl.Rect{0, 0, winWidth, camDZO}
 	camDZDown  sdl.Rect = sdl.Rect{0, winHeight - camDZO, winWidth, camDZO}
 	camDZLeft  sdl.Rect = sdl.Rect{0, 0, camDZO, winHeight}
@@ -42,22 +44,22 @@ func handleKeyEvent(key sdl.Keycode) {
 	switch key {
 	case 1073741906:
 		m = eng.MVSpeed.Up
-		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene), camDZUp, eng.Vector2d{}) {
+		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene.Cam), camDZUp, eng.Vector2d{}) {
 			currScene.Cam.WY += (m.Y * currScene.PC.Speed.Y)
 		}
 	case 1073741905:
 		m = eng.MVSpeed.Down
-		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene), camDZDown, eng.Vector2d{}) {
+		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene.Cam), camDZDown, eng.Vector2d{}) {
 			currScene.Cam.WY += (m.Y * currScene.PC.Speed.Y)
 		}
 	case 1073741904:
 		m = eng.MVSpeed.Left
-		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene), camDZLeft, eng.Vector2d{}) {
+		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene.Cam), camDZLeft, eng.Vector2d{}) {
 			currScene.Cam.WX += (m.X * currScene.PC.Speed.X)
 		}
 	case 1073741903:
 		m = eng.MVSpeed.Right
-		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene), camDZRight, eng.Vector2d{}) {
+		if eng.CheckColl(eng.WorldToScreen(currScene.PC.Pos, currScene.Cam), camDZRight, eng.Vector2d{}) {
 			currScene.Cam.WX += (m.X * currScene.PC.Speed.X)
 		}
 	}
@@ -144,26 +146,13 @@ func main() {
 		os.Exit(8)
 	}
 
-	/*
-		mus, err := mix.LoadMUS("assets/audio/test.mp3")
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to open music file: %s\n", err)
-				os.Exit(9)
-			}
-			println(&mus)
-				err = mus.Play(-1)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Failed to play music: %s\n", err)
-						os.Exit(10)
-					}*/
-
 	currScene = &eng.Scene{
 		Window:     eng.Window{winWidth, winHeight},
 		StartTime:  time.Now(),
 		Width:      2999,
 		Height:     2999,
 		Cam:        eng.Camera{0, 0},
-		EnemyCount: 220,
+		EnemyCount: 120,
 		TsTxt:      tilesetTxt,
 		SsTxt:      spritesheetTxt,
 		Font:       font,
