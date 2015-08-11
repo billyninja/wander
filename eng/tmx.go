@@ -136,12 +136,10 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 
 			// Spliting and converting into integer so that it
 			// can be used as array idx
-			for _, terr := range strings.Split(tt.TerStr, ",") {
+			for ti, terr := range strings.Split(tt.TerStr, ",") {
 				ttype, _ := strconv.Atoi(terr)
-				println(len(tmx.Tilesets[i].TerrTypes), ">>>", ttype)
-				terrList[i] = &tmx.Tilesets[i].TerrTypes[ttype]
+				terrList[ti] = &tmx.Tilesets[i].TerrTypes[ttype]
 			}
-
 			tmx.Tilesets[i].TTMap[tt.Id] = terrList
 		}
 
@@ -163,6 +161,12 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 				world[i][j].Gfxs[li] = &Gfx{
 					Txtr:   ts.Txtr,
 					Source: ts.GetGIDRect(tile.Gid),
+				}
+
+				for _, terr := range world[i][j].Terrains {
+					if terr != nil && terr.Name == "COLL_BLOCK" {
+						world[i][j].Coll = true
+					}
 				}
 			}
 		}
