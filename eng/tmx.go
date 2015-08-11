@@ -60,9 +60,8 @@ type Property struct {
 }
 
 type Terrain struct {
-	Name       string            `xml:"name,attr"`
-	PropList   []Property        `xml:"properties>property"`
-	Properties map[string]string // Must build from PropList
+	Name     string     `xml:"name,attr"`
+	PropList []Property `xml:"properties>property"`
 }
 
 type TileSet struct {
@@ -122,22 +121,6 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 		}
 		defer tilesetTxt.Destroy()
 
-		// TODO from PropList build Properties (map)
-
-		/*
-		 TerrTypes    []Terrain           `xml:"terraintypes"`
-		 TerrainTiles []Tile              `xml:"tile"`
-		 TTMap        map[int][4]*Terrain
-		*/
-
-		for _, terrt := range tmx.Tilesets[i].TerrTypes {
-			terrt.Properties = make(map[string]string)
-			for _, p := range terrt.PropList {
-				println(terrt.Name, ":", p.Name, "=", p.Value)
-				terrt.Properties[p.Name] = p.Value
-			}
-		}
-
 		for _, tt := range tmx.Tilesets[i].TerrainTiles {
 
 			var terrList [4]*Terrain
@@ -172,8 +155,25 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) [][]Space {
 				}
 
 				for _, terr := range world[i][j].Terrains {
-					if terr != nil && terr.Name == "COLL_BLOCK" {
-						world[i][j].Coll = true
+					/*
+						COLLISION
+						WARP_TO
+						DMG
+					*/
+					if terr == nil {
+						continue
+					}
+
+					//println(terr.Name)
+					for _, prop := range terr.PropList {
+						switch prop.Name {
+						case "COLL":
+							world[i][j].Coll = (prop.Value == "1")
+							break
+						case "WARP":
+							world[i][j].Warp = prop.Value
+							break
+						}
 					}
 				}
 			}

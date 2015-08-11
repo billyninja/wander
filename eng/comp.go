@@ -46,6 +46,8 @@ type Space struct {
 	Gfxs     [4]*Gfx // Store up to 4 layers of tiles
 	Terrains [4]*Terrain
 	Coll     bool
+	Warp     string
+	Dmg      int16
 }
 
 type Object struct {

@@ -3,11 +3,14 @@
  <tileset firstgid="1" name="ts1" tilewidth="32" tileheight="32">
   <image source="textures/ts1.png" width="736" height="672"/>
   <terraintypes>
-   <terrain name="COLL_BLOCK" tile="-1"/>
+   <terrain name="COLL_BLOCK" tile="-1">
+    <properties>
+     <property name="COLL" value="1"/>
+    </properties>
+   </terrain>
    <terrain name="DMG" tile="-1"/>
    <terrain name="SLOW" tile="-1"/>
-   <terrain name="DOOR" tile="-1">
-   </terrain>
+   <terrain name="DOOR" tile="-1"/>
   </terraintypes>
   <tile id="3" terrain="1,1,1,1"/>
   <tile id="4" terrain="1,1,1,1"/>
