@@ -63,6 +63,7 @@ func CheckAllColl(sbj Holder, s *Scene, spd Vector2d) bool {
 			if CheckColl(a_pos, b_pos, spd) {
 				println("collided!!")
 				//b.Collided(sbj)
+				return true
 			}
 		}
 	}
