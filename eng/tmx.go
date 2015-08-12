@@ -145,19 +145,21 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) ([][]Space, []*Object) {
 	}
 
 	world := make([][]Space, tmx.HeightTiles)
+	for i := 0; i < tmx.Layers[0].Height; i++ {
+		world[i] = make([]Space, tmx.WidthTiles)
+	}
+
 	ts := tmx.Tilesets[0]
 
 	for li, layer := range tmx.Layers {
-
 		for i := 0; i < layer.Height; i++ {
-
-			world[i] = make([]Space, tmx.WidthTiles)
-
 			for j := 0; j < layer.Width; j++ {
+
 				tile := layer.Tiles[(i*layer.Height)+j]
 
-				world[i][j].Terrains = ts.TTMap[tile.Gid]
-				world[i][j].Gfxs[li] = &Gfx{
+				// RENDER ORDER: RIGHT-DOWN
+				world[j][i].Terrains = ts.TTMap[tile.Gid]
+				world[j][i].Gfxs[li] = &Gfx{
 					Txtr:   ts.Txtr,
 					Source: ts.GetGIDRect(tile.Gid),
 				}

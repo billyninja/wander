@@ -30,7 +30,7 @@ type CullingMap struct {
 	TRIGs []Holder // GENERIC TRIGGER
 }
 
-func (cm *CullingMap) Add(obj Holder, s *Scene) bool {
+func (cm *CullingMap) Add(obj Holder, s *Scene) (bool, sdl.Rect) {
 
 	obj_pos := WorldToScreen(obj.GetPos(), s.Cam)
 
@@ -39,24 +39,24 @@ func (cm *CullingMap) Add(obj Holder, s *Scene) bool {
 		obj_pos.Y > 0 &&
 		obj_pos.X < s.Window.Width &&
 		obj_pos.Y < s.Window.Height) {
-		return false
+		return false, obj_pos
 	}
 
 	switch obj.GetType() {
 	case ENPC:
 		cm.ENPCs = append(cm.ENPCs, obj)
-		return true
+		return true, obj_pos
 	case FNPC:
 		cm.FNPCs = append(cm.FNPCs, obj)
-		return true
+		return true, obj_pos
 	case SOL:
 		cm.SOLs = append(cm.SOLs, obj)
-		return true
+		return true, obj_pos
 	case TRIG:
 		cm.TRIGs = append(cm.TRIGs, obj)
-		return true
+		return true, obj_pos
 	default:
-		return true
+		return true, obj_pos
 	}
 }
 
@@ -247,22 +247,29 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 					}
 
 					renderer.Copy(s.TsTxt, Source, &rect.Pos)
+
 				}
 			}
 
 			// Updating CullM with SOLID/COLLIDABLE terrain types
-			/*if s.World[worldCellX][worldCellY].Coll {
-				s.CullM.Add(s.World[worldCellX][worldCellY], s)
-			}*/
+			if s.World[worldCellX][worldCellY].Coll {
+
+				// fabricate fake SOL obj
+				tempO := &Object{
+					Pos:  rect.Pos,
+					Gfx:  nil,
+					Type: SOL,
+				}
+				s.CullM.Add(tempO, s)
+			}
 		}
 	}
 
 	// Rendering the enemies
 	for _, e := range s.Enemies {
-		pos := WorldToScreen(e.Pos, s.Cam)
-
-		if in := s.CullM.Add(e, s); in {
-			renderer.Copy(s.SsTxt, e.GetPose(), &pos)
+		in, e_pos := s.CullM.Add(e, s)
+		if in {
+			renderer.Copy(s.SsTxt, e.GetPose(), &e_pos)
 		}
 	}
 
@@ -282,8 +289,8 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 	// Rendering Game Objects
 	for _, obj := range s.Objects {
 
-		if in := s.CullM.Add(obj, s); in {
-			obj_pos := WorldToScreen(obj.Pos, s.Cam)
+		in, obj_pos := s.CullM.Add(obj, s)
+		if in {
 			renderer.SetDrawColor(255, 0, 0, 125)
 			renderer.FillRect(&obj_pos)
 		}

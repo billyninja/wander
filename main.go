@@ -165,7 +165,7 @@ func main() {
 	for running {
 		then := time.Now()
 		running = catchEvents()
-		currScene.Update()
+		//currScene.Update()
 		currScene.Render(renderer)
 
 		dur := time.Since(then)
