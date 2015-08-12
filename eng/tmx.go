@@ -148,6 +148,7 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) ([][]Space, []*Object) {
 	ts := tmx.Tilesets[0]
 
 	for li, layer := range tmx.Layers {
+
 		for i := 0; i < layer.Height; i++ {
 
 			world[i] = make([]Space, tmx.WidthTiles)
@@ -187,8 +188,9 @@ func LoadTMX(mapname string, renderer *sdl.Renderer) ([][]Space, []*Object) {
 	for _, g := range tmx.ObjGroups {
 		for _, o := range g.Objects {
 			obj := &Object{
-				Pos: sdl.Rect{o.X, o.Y, o.W, o.H},
-				Gfx: nil,
+				Pos:  sdl.Rect{o.X, o.Y, o.W, o.H},
+				Gfx:  nil,
+				Type: TRIG,
 			}
 			objects = append(objects, obj)
 		}

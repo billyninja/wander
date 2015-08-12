@@ -163,8 +163,8 @@
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
-   <tile gid="1"/>
-   <tile gid="1"/>
+   <tile gid="144"/>
+   <tile gid="144"/>
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
@@ -361,12 +361,12 @@
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
-   <tile gid="1"/>
+   <tile gid="47"/>
    <tile gid="285"/>
    <tile gid="285"/>
    <tile gid="285"/>
    <tile gid="285"/>
-   <tile gid="1"/>
+   <tile gid="139"/>
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
@@ -663,7 +663,7 @@
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
-   <tile gid="1"/>
+   <tile gid="54"/>
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
@@ -887,7 +887,7 @@
    <tile gid="1"/>
    <tile gid="1"/>
    <tile gid="1"/>
-   <tile gid="1"/>
+   <tile gid="144"/>
    <tile gid="1"/>
    <tile gid="4"/>
    <tile gid="1"/>
@@ -10162,7 +10162,7 @@
   </data>
  </layer>
  <objectgroup name="Doors">
-  <object name="toCave1" type="door" x="320" y="8" width="32" height="24">
+  <object name="toCave1" type="door" x="320" y="1" width="32" height="32">
    <properties>
     <property name="target" value="cave1"/>
    </properties>

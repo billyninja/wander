@@ -53,8 +53,12 @@ func CheckAllColl(sbj Holder, s *Scene, spd Vector2d) bool {
 	// NOTE: ORDER IS IMPORTANT HERE
 	// Since the func return (exits) on the first collision
 
+	sbj_type := sbj.GetType()
+
 	// If the subject is a Player Character...
-	if sbj.GetType() == PC {
+	if sbj_type == PC {
+		println("pc")
+
 		// Check against Abstract objects e.g: door triggers
 		for _, b := range s.CullM.TRIGs {
 
@@ -62,7 +66,7 @@ func CheckAllColl(sbj Holder, s *Scene, spd Vector2d) bool {
 
 			if CheckColl(a_pos, b_pos, spd) {
 				println("collided!!")
-				//b.Collided(sbj)
+				// b.Collided(sbj)
 				return true
 			}
 		}

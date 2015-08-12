@@ -64,7 +64,9 @@ func handleKeyEvent(key sdl.Keycode) {
 		}
 	}
 
-	currScene.PC.Move(m, currScene)
+	if m.X != 0 || m.Y != 0 {
+		currScene.PC.Move(m, currScene)
+	}
 
 }
 
@@ -149,10 +151,8 @@ func main() {
 	currScene = &eng.Scene{
 		Window:     eng.Window{winWidth, winHeight},
 		StartTime:  time.Now(),
-		Width:      2999,
-		Height:     2999,
 		Cam:        eng.Camera{0, 0},
-		EnemyCount: 120,
+		EnemyCount: 99,
 		TsTxt:      tilesetTxt,
 		SsTxt:      spritesheetTxt,
 		Font:       font,

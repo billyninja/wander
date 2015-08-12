@@ -128,18 +128,20 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 		CurrAction: sp1.WD,
 	}
 
-	s.WidthCells = uint16(s.Width / tileSize)
-	s.HeightCells = uint16(s.Height / tileSize)
-
 	s.World, s.Objects = LoadTMX("assets/world.tmx", renderer)
 
+	s.WidthCells = uint16(len(s.World))
+	s.HeightCells = uint16(len(s.World[0]))
+
+	// Defining some sample GUI elements
+	// Very early work
 	cl1 := sdl.Color{20, 20, 20, 255}
 	cl2 := sdl.Color{50, 50, 50, 255}
 	cl3 := sdl.Color{255, 255, 255, 255}
 
 	txt1 := TextEl{
 		RelPos:  Vector2d{20, 20},
-		Content: "asdqwe111",
+		Content: "testing some gui",
 		Font:    s.Font,
 		Color:   cl3,
 	}
@@ -159,6 +161,7 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 		Pos:      &sdl.Rect{0, 0, 1920, 900},
 	}
 
+	//println(&gb1)
 	s.GUIBlocks = append(s.GUIBlocks, &gb1)
 
 	for _, block := range s.GUIBlocks {
@@ -167,8 +170,10 @@ func (s *Scene) Init(renderer *sdl.Renderer) {
 
 	// TODO: load from tiled objects
 	for i := 0; uint16(i) < s.EnemyCount; i++ {
-		ci := rand.Int31n(s.Width)
-		cj := rand.Int31n(s.Height)
+
+		ci := rand.Int31n(int32(s.WidthCells) * tileSize)
+		cj := rand.Int31n(int32(s.HeightCells) * tileSize)
+
 		s.Enemies = append(s.Enemies, &Actor{
 			Object: Object{
 				sdl.Rect{ci, cj, tileSize, tileSize},
@@ -207,8 +212,9 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 	renderer.SetDrawColor(0, 0, 0, 255)
 
 	// Rendering the map
-	for sw := init; sw < s.Window.Width; sw += ofX {
-		for sh := init; sh < s.Window.Height; sh += ofY {
+	for sh := init; sh < s.Window.Height; sh += ofY {
+
+		for sw := init; sw < s.Window.Width; sw += ofX {
 
 			ofX = (tileSize - ((s.Cam.WX + sw) % tileSize))
 			ofY = (tileSize - ((s.Cam.WY + sh) % tileSize))
@@ -276,9 +282,8 @@ func (s *Scene) Render(renderer *sdl.Renderer) {
 	// Rendering Game Objects
 	for _, obj := range s.Objects {
 
-		obj_pos := WorldToScreen(obj.Pos, s.Cam)
-
 		if in := s.CullM.Add(obj, s); in {
+			obj_pos := WorldToScreen(obj.Pos, s.Cam)
 			renderer.SetDrawColor(255, 0, 0, 125)
 			renderer.FillRect(&obj_pos)
 		}
